@@ -34,9 +34,6 @@ namespace DuiLib
 		void SetSelectedBkColor(DWORD dwBkColor);
 		DWORD GetSelectBkColor();
 
-		LPCTSTR GetForeImage();
-		void SetForeImage(LPCTSTR pStrImage);
-
 		LPCTSTR GetSelectedForedImage();
 		void SetSelectedForedImage(LPCTSTR pStrImage);
 
@@ -58,11 +55,10 @@ namespace DuiLib
 		DWORD			m_dwSelectedBkColor;
 		DWORD			m_dwSelectedTextColor;
 
-		CDuiString		m_sSelectedImage;
-		CDuiString		m_sSelectedHotImage;
-		CDuiString		m_sSelectedPushedImage;
-		CDuiString		m_sForeImage;
-		CDuiString		m_sSelectedForeImage;
+		CImageAttribute		m_selectedImage;
+		CImageAttribute		m_selectedHotImage;
+		CImageAttribute		m_selectedPushedImage;
+		CImageAttribute		m_selectedForeImage;
 	};
 
 } // namespace DuiLib

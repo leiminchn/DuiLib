@@ -3,7 +3,10 @@
 
 namespace DuiLib
 {
-	COptionUI::COptionUI() : m_bSelected(false), m_dwSelectedTextColor(0)
+	COptionUI::COptionUI() 
+		: m_bSelected(false)
+		, m_dwSelectedTextColor(0)
+		, m_dwSelectedBkColor(0)
 	{
 	}
 
@@ -111,34 +114,34 @@ namespace DuiLib
 
 	LPCTSTR COptionUI::GetSelectedImage()
 	{
-		return m_sSelectedImage;
+		return m_selectedImage.GetAttributeString();
 	}
 
 	void COptionUI::SetSelectedImage(LPCTSTR pStrImage)
 	{
-		m_sSelectedImage = pStrImage;
+		m_selectedImage.SetAttributeString(pStrImage);
 		Invalidate();
 	}
 
 	LPCTSTR COptionUI::GetSelectedHotImage()
 	{
-		return m_sSelectedHotImage;
+		return m_selectedHotImage.GetAttributeString();
 	}
 
 	void COptionUI::SetSelectedHotImage( LPCTSTR pStrImage )
 	{
-		m_sSelectedHotImage = pStrImage;
+		m_selectedHotImage.SetAttributeString(pStrImage);
 		Invalidate();
 	}
 
 	LPCTSTR COptionUI::GetSelectedPushedImage()
 	{
-		return m_sSelectedPushedImage;
+		return m_selectedPushedImage.GetAttributeString();
 	}
 
 	void COptionUI::SetSelectedPushedImage(LPCTSTR pStrImage)
 	{
-		m_sSelectedPushedImage = pStrImage;
+		m_selectedPushedImage.SetAttributeString(pStrImage);
 		Invalidate();
 	}
 
@@ -163,25 +166,14 @@ namespace DuiLib
 		return m_dwSelectedBkColor;
 	}
 
-	LPCTSTR COptionUI::GetForeImage()
-	{
-		return m_sForeImage;
-	}
-
-	void COptionUI::SetForeImage(LPCTSTR pStrImage)
-	{
-		m_sForeImage = pStrImage;
-		Invalidate();
-	}
-
 	LPCTSTR COptionUI::GetSelectedForedImage()
 	{
-		return m_sSelectedForeImage;
+		return m_selectedForeImage.GetAttributeString();
 	}
 
 	void COptionUI::SetSelectedForedImage(LPCTSTR pStrImage)
 	{
-		m_sSelectedForeImage = pStrImage;
+		m_selectedForeImage.SetAttributeString(pStrImage);
 		Invalidate();
 	}
 
@@ -198,7 +190,6 @@ namespace DuiLib
 		else if( _tcscmp(pstrName, _T("selectedimage")) == 0 ) SetSelectedImage(pstrValue);
 		else if( _tcscmp(pstrName, _T("selectedhotimage")) == 0 ) SetSelectedHotImage(pstrValue);
 		else if( _tcscmp(pstrName, _T("selectedpushedimage")) == 0 ) SetSelectedPushedImage(pstrValue);
-		else if( _tcscmp(pstrName, _T("foreimage")) == 0 ) SetForeImage(pstrValue);
 		else if( _tcscmp(pstrName, _T("selectedforeimage")) == 0 ) SetSelectedForedImage(pstrValue);
 		else if( _tcscmp(pstrName, _T("selectedbkcolor")) == 0 ) {
 			if( *pstrValue == _T('#')) pstrValue = ::CharNext(pstrValue);
@@ -217,38 +208,41 @@ namespace DuiLib
 
 	void COptionUI::PaintStatusImage(HDC hDC)
 	{
-
-		if( (m_uButtonState & UISTATE_PUSHED) != 0 && IsSelected() && !m_sSelectedPushedImage.IsEmpty()) {
-			if( !DrawImage(hDC, (LPCTSTR)m_sSelectedPushedImage) )
-				m_sSelectedPushedImage.Empty();
-			else goto Label_ForeImage;
-		}
-		else if( (m_uButtonState & UISTATE_HOT) != 0 && IsSelected() && !m_sSelectedHotImage.IsEmpty()) {
-			if( !DrawImage(hDC, (LPCTSTR)m_sSelectedHotImage) )
-				m_sSelectedHotImage.Empty();
-			else goto Label_ForeImage;
-		}
-		else if( (m_uButtonState & UISTATE_SELECTED) != 0 ) {
-			if( !m_sSelectedImage.IsEmpty() ) {
-				if( !DrawImage(hDC, (LPCTSTR)m_sSelectedImage) ) m_sSelectedImage.Empty();
-				else goto Label_ForeImage;
+		do 
+		{
+			if ((m_uButtonState & UISTATE_PUSHED) != 0 && IsSelected() && m_selectedPushedImage.IsLoadSuccess())
+			{
+				if (DrawImage(hDC, m_selectedPushedImage))
+					break;
 			}
-			else if(m_dwSelectedBkColor != 0) {
-				CRenderEngine::DrawColor(hDC, m_rcPaint, GetAdjustColor(m_dwSelectedBkColor));
-				return;
-			}	
-		}
+			else if ((m_uButtonState & UISTATE_HOT) != 0 && IsSelected() && m_selectedHotImage.IsLoadSuccess()) {
+				if (DrawImage(hDC, m_selectedHotImage))
+					break;
+			}
+			else if ((m_uButtonState & UISTATE_SELECTED) != 0)
+			{
+				if (m_selectedImage.IsLoadSuccess())
+				{
+					if (DrawImage(hDC, m_selectedImage))
+						break;
+				}
+				else if (m_dwSelectedBkColor != 0)
+				{
+					CRenderEngine::DrawColor(hDC, m_rcPaint, GetAdjustColor(m_dwSelectedBkColor));
+					return;
+				}
+			}
 
-		CButtonUI::PaintStatusImage(hDC);
+			CButtonUI::PaintStatusImage(hDC);
+		} while (0);
 
-Label_ForeImage:
-		if ( IsSelected() && !m_sSelectedForeImage.IsEmpty())
+		if ( IsSelected() && m_selectedForeImage.IsLoadSuccess())
 		{
-			if( !DrawImage(hDC, (LPCTSTR)m_sSelectedForeImage) ) m_sSelectedForeImage.Empty();
+			DrawImage(hDC, m_selectedForeImage);
 		}
-		else if(  !m_sForeImage.IsEmpty() ) 
+		else if( m_foreImage.IsLoadSuccess() ) 
 		{
-			if( !DrawImage(hDC, (LPCTSTR)m_sForeImage) ) m_sForeImage.Empty();
+			DrawImage(hDC, m_foreImage);
 		}
 
 	}

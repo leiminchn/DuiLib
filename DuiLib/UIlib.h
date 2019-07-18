@@ -1,22 +1,17 @@
-/*#define UILIB_API*/
 #if defined(UILIB_EXPORTS)
-#if defined(_MSC_VER)
-#define UILIB_API __declspec(dllexport)
+#	if defined(_MSC_VER)
+#		define UILIB_API __declspec(dllexport)
+#	else
+#		define UILIB_API 
+#	endif
 #else
-#define UILIB_API 
-#endif
-#else
-#if defined(_MSC_VER)
-#define UILIB_API __declspec(dllimport)
-#else
-#define UILIB_API 
-#endif
+#	if defined(_MSC_VER)
+#		define UILIB_API __declspec(dllimport)
+#	else
+#		define UILIB_API 
+#	endif
 #endif
 
-// #pragma comment(lib,"oledlg.lib")
-// #pragma comment(lib,"winmm.lib")
-// #pragma comment(lib,"comctl32.lib") 
-// #pragma comment(lib,"Riched20.lib")
 #pragma comment(lib,"gdiplus.lib")
 
 #define UILIB_COMDAT __declspec(selectany)
@@ -49,6 +44,7 @@
 #include "Core/UIDefine.h"
 #include "Core/UIManager.h"
 #include "Core/UIBase.h"
+#include "Core/UIImageAttribute.h"
 #include "Core/UIControl.h"
 #include "Core/UIContainer.h"
 #include "Core/UIMarkup.h"
@@ -80,7 +76,6 @@
 #include "Control/UIProgress.h"
 #include "Control/UISlider.h"
 
-#include "Control/UIComboBox.h"
 #include "Control/UIRichEdit.h"
 #include "Control/UIDateTime.h"
 

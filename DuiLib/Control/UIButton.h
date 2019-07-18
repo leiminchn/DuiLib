@@ -18,20 +18,10 @@ namespace DuiLib
 		void SetEnabled(bool bEnable = true);
 		void DoEvent(TEventUI& event);
 
-		LPCTSTR GetNormalImage();
-		void SetNormalImage(LPCTSTR pStrImage);
-		LPCTSTR GetHotImage();
-		void SetHotImage(LPCTSTR pStrImage);
-		LPCTSTR GetPushedImage();
-		void SetPushedImage(LPCTSTR pStrImage);
-		LPCTSTR GetFocusedImage();
-		void SetFocusedImage(LPCTSTR pStrImage);
-		LPCTSTR GetDisabledImage();
-		void SetDisabledImage(LPCTSTR pStrImage);
-		LPCTSTR GetForeImage();
-		void SetForeImage(LPCTSTR pStrImage);
 		LPCTSTR GetHotForeImage();
 		void SetHotForeImage(LPCTSTR pStrImage);
+		LPCTSTR GetPushedForeImage();
+		void SetPushedForeImage(LPCTSTR pStrImage);
 
 		void BindTabIndex(int _BindTabIndex);
 		void BindTabLayoutName(LPCTSTR _TabLayoutName);
@@ -62,13 +52,8 @@ namespace DuiLib
 		DWORD m_dwPushedTextColor;
 		DWORD m_dwFocusedTextColor;
 
-		CDuiString m_sNormalImage;
-		CDuiString m_sHotImage;
-		CDuiString m_sHotForeImage;
-		CDuiString m_sPushedImage;
-		CDuiString m_sPushedForeImage;
-		CDuiString m_sFocusedImage;
-		CDuiString m_sDisabledImage;
+		CImageAttribute m_hotForeImage;
+		CImageAttribute m_pushedForeImage;
 
 		int			m_iBindTabIndex;
 		CDuiString	m_sBindTabLayoutName;

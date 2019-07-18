@@ -98,7 +98,7 @@ void CShadowUI::Create(CPaintManagerUI* pPaintManager)
 	m_OriParentProc = GetWindowLongPtr(hParentWnd, GWLP_WNDPROC);
 
 #pragma warning(disable: 4311)	// temporrarily disable the type_cast warning in Win32
-	SetWindowLongPtr(hParentWnd, GWLP_WNDPROC, (LONG)ParentProc);
+	SetWindowLongPtr(hParentWnd, GWLP_WNDPROC, (LONG_PTR)ParentProc);
 #pragma warning(default: 4311)
 
 }
@@ -237,6 +237,9 @@ void CShadowUI::Update(HWND hParent)
 	}
 	else
 	{
+		if (m_nSize == 0)
+			return;
+
 		nShadWndWid = WndRect.right - WndRect.left + m_nSize * 2;
 		nShadWndHei = WndRect.bottom - WndRect.top + m_nSize * 2;
 	}
@@ -629,6 +632,8 @@ bool CShadowUI::CopyShadow(CShadowUI* pShadow)
 		pShadow->SetColor(m_Color);
 		pShadow->SetPosition((int)m_nxOffset, (int)m_nyOffset);
 	}
+
+	pShadow->ShowShadow(m_bIsShowShadow);
 	return true;
 }
 } //namespace DuiLib

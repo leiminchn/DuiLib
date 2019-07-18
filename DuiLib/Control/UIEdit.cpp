@@ -35,7 +35,7 @@ namespace DuiLib
 		m_pOwner = pOwner;
 		RECT rcPos = CalPos();
 		UINT uStyle = 0;
-		if(m_pOwner->GetManager()->IsBackgroundTransparent())
+		if(m_pOwner->GetManager()->IsLayeredWindow())
 		{
 			uStyle = WS_POPUP | ES_AUTOHSCROLL | WS_VISIBLE;
 			RECT rcWnd={0};
@@ -393,50 +393,6 @@ namespace DuiLib
 		return m_cPasswordChar;
 	}
 
-	LPCTSTR CEditUI::GetNormalImage()
-	{
-		return m_sNormalImage;
-	}
-
-	void CEditUI::SetNormalImage(LPCTSTR pStrImage)
-	{
-		m_sNormalImage = pStrImage;
-		Invalidate();
-	}
-
-	LPCTSTR CEditUI::GetHotImage()
-	{
-		return m_sHotImage;
-	}
-
-	void CEditUI::SetHotImage(LPCTSTR pStrImage)
-	{
-		m_sHotImage = pStrImage;
-		Invalidate();
-	}
-
-	LPCTSTR CEditUI::GetFocusedImage()
-	{
-		return m_sFocusedImage;
-	}
-
-	void CEditUI::SetFocusedImage(LPCTSTR pStrImage)
-	{
-		m_sFocusedImage = pStrImage;
-		Invalidate();
-	}
-
-	LPCTSTR CEditUI::GetDisabledImage()
-	{
-		return m_sDisabledImage;
-	}
-
-	void CEditUI::SetDisabledImage(LPCTSTR pStrImage)
-	{
-		m_sDisabledImage = pStrImage;
-		Invalidate();
-	}
-
 	void CEditUI::SetNativeEditBkColor(DWORD dwBkColor)
 	{
 		m_dwEditbkColor = dwBkColor;
@@ -534,10 +490,6 @@ namespace DuiLib
 		else if( _tcscmp(pstrName, _T("password")) == 0 ) SetPasswordMode(_tcscmp(pstrValue, _T("true")) == 0);
 		else if( _tcscmp(pstrName, _T("passwordchar")) == 0 ) SetPasswordChar(*pstrValue);
 		else if( _tcscmp(pstrName, _T("maxchar")) == 0 ) SetMaxChar(_ttoi(pstrValue));
-		else if( _tcscmp(pstrName, _T("normalimage")) == 0 ) SetNormalImage(pstrValue);
-		else if( _tcscmp(pstrName, _T("hotimage")) == 0 ) SetHotImage(pstrValue);
-		else if( _tcscmp(pstrName, _T("focusedimage")) == 0 ) SetFocusedImage(pstrValue);
-		else if( _tcscmp(pstrName, _T("disabledimage")) == 0 ) SetDisabledImage(pstrValue);
 		else if( _tcscmp(pstrName, _T("tipvalue")) == 0 ) SetTipValue(pstrValue);
 		else if( _tcscmp(pstrName, _T("tipvaluecolor")) == 0 ) SetTipValueColor(pstrValue);
 		else if( _tcscmp(pstrName, _T("nativetextcolor")) == 0 ) SetNativeEditTextColor(pstrValue);
@@ -557,51 +509,58 @@ namespace DuiLib
 		if( !IsEnabled() ) m_uButtonState |= UISTATE_DISABLED;
 		else m_uButtonState &= ~ UISTATE_DISABLED;
 
-		if( (m_uButtonState & UISTATE_DISABLED) != 0 ) {
-			if( !m_sDisabledImage.IsEmpty() ) {
-				if( !DrawImage(hDC, (LPCTSTR)m_sDisabledImage) ) m_sDisabledImage.Empty();
-				else return;
+		if( (m_uButtonState & UISTATE_DISABLED) != 0 )
+		{
+			if (m_disabledImage.IsLoadSuccess())
+			{
+				DrawImage(hDC, m_disabledImage);
+				return;
 			}
 		}
-		else if( (m_uButtonState & UISTATE_FOCUSED) != 0 ) {
-			if( !m_sFocusedImage.IsEmpty() ) {
-				if( !DrawImage(hDC, (LPCTSTR)m_sFocusedImage) ) m_sFocusedImage.Empty();
-				else return;
+		else if ((m_uButtonState & UISTATE_FOCUSED) != 0)
+		{
+			if (m_focusedImage.IsLoadSuccess())
+			{
+				DrawImage(hDC, m_focusedImage);
+				return;
 			}
 		}
-		else if( (m_uButtonState & UISTATE_HOT) != 0 ) {
-			if( !m_sHotImage.IsEmpty() ) {
-				if( !DrawImage(hDC, (LPCTSTR)m_sHotImage) ) m_sHotImage.Empty();
-				else return;
+		else if( (m_uButtonState & UISTATE_HOT) != 0 ) 
+		{
+			if( m_hotImage.IsLoadSuccess() )
+			{
+				DrawImage(hDC, m_hotImage);
+				return;
 			}
 		}
 
-		if( !m_sNormalImage.IsEmpty() ) {
-			if( !DrawImage(hDC, (LPCTSTR)m_sNormalImage) ) m_sNormalImage.Empty();
-			else return;
-		}
+		DrawImage(hDC, m_normalImage);
 	}
 
 	void CEditUI::PaintText(HDC hDC)
 	{
 		DWORD mCurTextColor = m_dwTextColor;
 
-		if( m_dwTextColor == 0 ) mCurTextColor = m_dwTextColor = m_pManager->GetDefaultFontColor();
-		if(GetText() == m_sTipValue || GetText() == _T(""))	mCurTextColor = m_dwTipValueColor;
+		if( m_dwTextColor == 0 ) mCurTextColor = m_dwTextColor = m_pManager->GetDefaultFontColor();		
 		if( m_dwDisabledTextColor == 0 ) m_dwDisabledTextColor = m_pManager->GetDefaultDisabledColor();
 
 		CDuiString sText;
-		if( m_sText.IsEmpty() ) 
-			sText = m_sTipValue;
-		else 
+		if(GetText() == m_sTipValue || GetText() == _T(""))	
+		{
+			mCurTextColor = m_dwTipValueColor;
+			sText = m_sTipValue;			
+		}
+		else
+		{
 			sText = m_sText;
 
-		if( m_bPasswordMode ) {
-			sText.Empty();
-			LPCTSTR p = m_sText.GetData();
-			while( *p != _T('\0') ) {
-				sText += m_cPasswordChar;
-				p = ::CharNext(p);
+			if( m_bPasswordMode ) {
+				sText.Empty();
+				LPCTSTR p = m_sText.GetData();
+				while( *p != _T('\0') ) {
+					sText += m_cPasswordChar;
+					p = ::CharNext(p);
+				}
 			}
 		}
 
